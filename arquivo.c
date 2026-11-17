@@ -14,6 +14,9 @@
 /* Quantos campos cada linha do CSV tem. */
 #define CAMPOS_POR_LINHA 5
 
+/* Tamanho do texto de formato que o sscanf usa para ler uma linha. */
+#define TAM_FORMATO 64
+
 static int linha_para_alimento(const char *linha, Alimento_t *alimento);
 static Alimento_t *vetor_aumentar(Alimento_t *vetor, int *capacidade);
 
@@ -53,11 +56,14 @@ Alimento_t *arquivo_ler_csv(const char *caminho, int *total)
 static int linha_para_alimento(const char *linha, Alimento_t *alimento)
 {
     char categoria[TAM_MAX_DESCRICAO];
+    char formato[TAM_FORMATO];
     int convertido = 0;
 
+    snprintf(formato, sizeof(formato), "%%d;%%%d[^;];%%%d[^;];%%lf;%%lf",
+             TAM_MAX_DESCRICAO - 1, TAM_MAX_DESCRICAO - 1);
     memset(alimento, 0, sizeof(Alimento_t));
-    /* NA/Tr/branco da TACO gravado como 0 */
-    if (sscanf(linha, "%d;%127[^;];%127[^;];%lf;%lf", &alimento->numero,
+    /* NA, Tr, '*' e branco da TACO gravados como 0 */
+    if (sscanf(linha, formato, &alimento->numero,
                alimento->descricao, categoria, &alimento->energia_kcal,
                &alimento->proteina_g) == CAMPOS_POR_LINHA) {
         alimento->categoria = categoria_converter(categoria);

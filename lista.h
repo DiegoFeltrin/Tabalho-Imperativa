@@ -34,14 +34,14 @@ NoCategoria_t *lista_obter_categoria_por_indice(NoCategoria_t *cabeca,
                                                 int indice);
 
 /* Mostra os alimentos da categoria em ordem alfabetica. */
-void lista_exibir_alimentos_categoria(const NoCategoria_t *categoria);
+void lista_exibir_alimentos_categoria(const NoCategoria_t *no_categoria);
 
 /* Remove o alimento com esse numero e refaz as arvores; devolve 1 se removeu. */
-int lista_remover_alimento(NoCategoria_t *categoria, int numero_alimento);
+int lista_remover_alimento(NoCategoria_t *no_categoria, int numero_alimento);
 
 /* Remove a categoria e libera tudo o que ela tem; devolve 1 se removeu. */
 int lista_remover_categoria(NoCategoria_t **cabeca_categorias,
-                            Categoria_e cat);
+                            Categoria_e categoria);
 
 /* Grava os alimentos que restaram e devolve quantos gravou (-1 se deu erro). */
 int lista_salvar_binario(const NoCategoria_t *cabeca,

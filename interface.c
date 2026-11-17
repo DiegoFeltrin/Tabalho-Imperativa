@@ -84,10 +84,10 @@ static int ler_inteiro(int valor_fim_entrada)
 /* Opcao 2: mostra os alimentos da categoria escolhida. */
 void acao_listar_alimentos(NoCategoria_t *cabeca)
 {
-    NoCategoria_t *cat = selecionar_categoria(cabeca);
+    NoCategoria_t *no_categoria = selecionar_categoria(cabeca);
 
-    if (cat) {
-        lista_exibir_alimentos_categoria(cat);
+    if (no_categoria) {
+        lista_exibir_alimentos_categoria(no_categoria);
     }
 }
 
@@ -112,49 +112,49 @@ static NoCategoria_t *selecionar_categoria(NoCategoria_t *cabeca)
 /* Lista uma categoria pela arvore de energia ou de proteina, da maior para a menor. */
 void listar_decrescente(NoCategoria_t *cabeca, int por_energia)
 {
-    NoCategoria_t *cat = selecionar_categoria(cabeca);
+    NoCategoria_t *no_categoria = selecionar_categoria(cabeca);
 
-    if (cat) {
-        const NoArvore_t *arvore = cat->arvore_proteina;
+    if (no_categoria) {
+        const NoArvore_t *arvore = no_categoria->arvore_proteina;
         const char *grandeza = "PROTEINA";
-        int cont = 0;
+        int contador = 0;
 
         if (por_energia) {
-            arvore = cat->arvore_energia;
+            arvore = no_categoria->arvore_energia;
             grandeza = "ENERGIA";
         }
         printf("\n--- ALIMENTOS DE '%s' POR %s DECRESCENTE (ARVORE) ---\n",
-               categoria_para_texto(cat->categoria), grandeza);
-        arvore_listar_decrescente(arvore, &cont);
-        exibir_rodape("alimentos exibidos", cont);
+               categoria_para_texto(no_categoria->categoria), grandeza);
+        arvore_listar_decrescente(arvore, &contador);
+        exibir_rodape("alimentos exibidos", contador);
     }
 }
 
 /* Le a faixa e lista a categoria pela arvore de energia ou de proteina. */
 void listar_faixa(NoCategoria_t *cabeca, int por_energia)
 {
-    NoCategoria_t *cat = selecionar_categoria(cabeca);
+    NoCategoria_t *no_categoria = selecionar_categoria(cabeca);
 
-    if (cat) {
-        const NoArvore_t *arvore = cat->arvore_proteina;
+    if (no_categoria) {
+        const NoArvore_t *arvore = no_categoria->arvore_proteina;
         const char *pergunta = "proteina (g)";
         const char *grandeza = "PROTEINA";
         const char *unidade = "G";
         double min;
         double max;
-        int cont = 0;
+        int contador = 0;
 
         if (por_energia) {
-            arvore = cat->arvore_energia;
+            arvore = no_categoria->arvore_energia;
             pergunta = "energia (kcal)";
             grandeza = "ENERGIA";
             unidade = "KCAL";
         }
         if (ler_faixa(pergunta, &min, &max)) {
             printf("\n--- ALIMENTOS DE '%s' COM %s ENTRE %.1f E %.1f %s ---\n",
-                   categoria_para_texto(cat->categoria), grandeza, min, max, unidade);
-            arvore_listar_faixa(arvore, min, max, &cont);
-            exibir_rodape("alimentos encontrados na faixa", cont);
+                   categoria_para_texto(no_categoria->categoria), grandeza, min, max, unidade);
+            arvore_listar_faixa(arvore, min, max, &contador);
+            exibir_rodape("alimentos encontrados na faixa", contador);
         }
     }
 }
@@ -221,16 +221,19 @@ static void exibir_rodape(const char *texto, int total)
     printf("------------------------------------------------------------\n");
 }
 
-/* Opcao 7: avisa e remove a categoria escolhida com todos os seus alimentos. */
+/* Opcao 7: remove a categoria escolhida com todos os seus alimentos e avisa. */
 int acao_remover_categoria(NoCategoria_t **cabeca)
 {
     int removeu = 0;
-    NoCategoria_t *cat = selecionar_categoria(*cabeca);
+    const char *nome;
+    NoCategoria_t *no_categoria = selecionar_categoria(*cabeca);
 
-    if (cat) {
-        printf("SUCESSO: Categoria '%s' e todos os seus "
-               "alimentos foram removidos!\n", categoria_para_texto(cat->categoria));
-        removeu = lista_remover_categoria(cabeca, cat->categoria);
+    if (no_categoria) {
+        nome = categoria_para_texto(no_categoria->categoria);
+        removeu = lista_remover_categoria(cabeca, no_categoria->categoria);
+        if (removeu) {
+            printf("SUCESSO: Categoria '%s' e todos os seus alimentos foram removidos!\n", nome);
+        }
     }
 
     return removeu;
@@ -240,18 +243,18 @@ int acao_remover_categoria(NoCategoria_t **cabeca)
 int acao_remover_alimento(NoCategoria_t *cabeca)
 {
     int removeu = 0;
-    NoCategoria_t *cat = selecionar_categoria(cabeca);
+    NoCategoria_t *no_categoria = selecionar_categoria(cabeca);
 
-    if (cat) {
+    if (no_categoria) {
         int num_alimento;
 
-        lista_exibir_alimentos_categoria(cat);
+        lista_exibir_alimentos_categoria(no_categoria);
         printf("Digite o numero do alimento que deseja remover: ");
         num_alimento = ler_inteiro(LEITURA_INVALIDA);
-        removeu = lista_remover_alimento(cat, num_alimento);
+        removeu = lista_remover_alimento(no_categoria, num_alimento);
         if (removeu) {
             printf("SUCESSO: Alimento %d removido e arvores de "
-                   "'%s' reconstruidas!\n", num_alimento, categoria_para_texto(cat->categoria));
+                   "'%s' reconstruidas!\n", num_alimento, categoria_para_texto(no_categoria->categoria));
         } else {
             printf("AVISO: Alimento com numero %d nao encontrado "
                    "nesta categoria.\n", num_alimento);

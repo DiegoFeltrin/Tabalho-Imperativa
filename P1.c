@@ -15,8 +15,8 @@
 /* Converte o CSV em binario e confere o arquivo gravado (Etapa B). */
 int main(void)
 {
-    Alimento_t *lista_original = NULL;
-    Alimento_t *lista_verificacao = NULL;
+    Alimento_t *vetor_lido = NULL;
+    Alimento_t *vetor_conferencia = NULL;
     int codigo_retorno = EXIT_SUCCESS;
     int total_lidos = 0;
     int total_gravados = 0;
@@ -30,7 +30,7 @@ int main(void)
     printf("=====================================================\n\n");
 
     printf("[1/3] Lendo arquivo CSV: '%s'...\n", ARQUIVO_CSV);
-    lista_original = arquivo_ler_csv(ARQUIVO_CSV, &total_lidos);
+    vetor_lido = arquivo_ler_csv(ARQUIVO_CSV, &total_lidos);
     if (total_lidos <= 0) {
         fprintf(stderr, "ERRO: Leitura do CSV falhou! Registros lidos: %d\n",
                 total_lidos);
@@ -46,7 +46,7 @@ int main(void)
 
     if (codigo_retorno == EXIT_SUCCESS) {
         printf("\n[2/3] Gravando em formato binario: '%s'...\n", ARQUIVO_BIN);
-        total_gravados = arquivo_gravar_binario(ARQUIVO_BIN, lista_original,
+        total_gravados = arquivo_gravar_binario(ARQUIVO_BIN, vetor_lido,
                                                 total_lidos);
         if (total_gravados != total_lidos) {
             fprintf(stderr, "ERRO: Falha ao gravar no arquivo binario! "
@@ -74,14 +74,14 @@ int main(void)
     }
 
     if (codigo_retorno == EXIT_SUCCESS) {
-        lista_verificacao = calloc((size_t)total_lidos, sizeof(Alimento_t));
-        if (!lista_verificacao) {
-            free(lista_original);
+        vetor_conferencia = calloc((size_t)total_lidos, sizeof(Alimento_t));
+        if (!vetor_conferencia) {
+            free(vetor_lido);
             fprintf(stderr, "ERRO FATAL: Memoria insuficiente para conferir "
                     "'%s'.\n", ARQUIVO_BIN);
             exit(EXIT_FAILURE);
         }
-        total_conferidos = arquivo_ler_binario(ARQUIVO_BIN, lista_verificacao,
+        total_conferidos = arquivo_ler_binario(ARQUIVO_BIN, vetor_conferencia,
                                                total_lidos);
         if (total_conferidos != total_lidos) {
             fprintf(stderr, "ERRO: Leitura de verificacao do binario "
@@ -90,13 +90,13 @@ int main(void)
         } else {
             printf("SUCESSO: Conferencia confirmada! "
                    "%d registros validos.\n", total_conferidos);
-            exibir_amostras(lista_verificacao, total_conferidos);
+            exibir_amostras(vetor_conferencia, total_conferidos);
             printf("Status: Etapa B concluida com sucesso absoluto!\n");
         }
     }
 
-    free(lista_verificacao);
-    free(lista_original);
+    free(vetor_conferencia);
+    free(vetor_lido);
 
     return codigo_retorno;
 }

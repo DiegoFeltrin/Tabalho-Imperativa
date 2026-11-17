@@ -9,14 +9,18 @@
 
 /* Larguras, em letras, das colunas da descricao e da categoria. */
 #define LARGURA_DESCRICAO 45
-#define LARGURA_CATEGORIA 35
+#define LARGURA_CATEGORIA 37
 
 /* Em UTF-8, os bytes de continuacao de uma letra tem a forma 10xxxxxx. */
 #define UTF8_MASCARA_CONTINUACAO 0xC0
 #define UTF8_BYTE_CONTINUACAO 0x80
 
+/* Final de um texto cortado para caber na coluna. */
+#define RETICENCIAS "..."
+#define TAM_RETICENCIAS 3
+
 /* Nome de cada categoria, na mesma ordem do enum Categoria_e. */
-static const char *NOMES[TOTAL_CATEGORIAS] = {
+static const char * const NOMES[TOTAL_CATEGORIAS] = {
     "Alimentos preparados",
     "Bebidas (alcoólicas e não alcoólicas)",
     "Carnes e derivados",
@@ -68,21 +72,29 @@ void alimento_exibir(const Alimento_t *alimento)
     printf(" | %6.1f kcal | %5.1f g prot\n", alimento->energia_kcal, alimento->proteina_g);
 }
 
-/* Conta as letras do texto sem os bytes de continuacao e completa com espacos. */
+/* Mostra o texto com largura letras: completa com espacos ou corta e termina com "...". */
 void imprimir_alinhado(const char *texto, int largura)
 {
     int tamanho = (int)strlen(texto);
     int letras = 0;
+    int bytes_corte = tamanho;
     int i;
 
     for (i = 0; i < tamanho; i++) {
         if (((unsigned char)texto[i] & UTF8_MASCARA_CONTINUACAO) != UTF8_BYTE_CONTINUACAO) {
             letras++;
+            if (letras == largura - TAM_RETICENCIAS + 1) {
+                bytes_corte = i;
+            }
         }
     }
 
-    printf("%s", texto);
-    for (i = 0; i < largura - letras; i++) {
-        putchar(' ');
+    if (letras > largura) {
+        printf("%.*s%s", bytes_corte, texto, RETICENCIAS);
+    } else {
+        printf("%s", texto);
+        for (i = 0; i < largura - letras; i++) {
+            putchar(' ');
+        }
     }
 }

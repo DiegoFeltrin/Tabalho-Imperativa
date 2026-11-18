@@ -2,6 +2,7 @@
 
 #include "alimento.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Nome mostrado para uma categoria que nao esta na tabela. */
@@ -20,6 +21,7 @@
 #define TAM_RETICENCIAS 3
 
 /* Nome de cada categoria, na mesma ordem do enum Categoria_e. */
+/* Por estarem na mesma ordem, o proprio enum serve de indice: NOMES[CAT_BEBIDAS] e "Bebidas...". */
 static const char * const NOMES[TOTAL_CATEGORIAS] = {
     "Alimentos preparados",
     "Bebidas (alcoólicas e não alcoólicas)",
@@ -43,6 +45,7 @@ Categoria_e categoria_converter(const char *texto)
 {
     int i = 0;
 
+    /* Para no primeiro nome igual; se nao achar, i chega a 15, que e o valor de CAT_INVALIDA. */
     while (i < TOTAL_CATEGORIAS && strcmp(texto, NOMES[i]) != 0) {
         i++;
     }
@@ -55,6 +58,8 @@ const char *categoria_para_texto(Categoria_e categoria)
 {
     const char *resultado = TEXTO_DESCONHECIDA;
 
+    /* Confere o intervalo antes de usar como indice: um dados.bin estragado */
+    /* poderia trazer um valor fora do enum. */
     if ((int)categoria >= 0 && (int)categoria < TOTAL_CATEGORIAS) {
         resultado = NOMES[categoria];
     }
@@ -63,6 +68,7 @@ const char *categoria_para_texto(Categoria_e categoria)
 }
 
 /* Mostra numero, descricao, categoria, energia e proteina. */
+/* As colunas de texto passam por imprimir_alinhado para os '|' ficarem alinhados. */
 void alimento_exibir(const Alimento_t *alimento)
 {
     printf("[%3d] ", alimento->numero);
@@ -73,6 +79,7 @@ void alimento_exibir(const Alimento_t *alimento)
 }
 
 /* Mostra o texto com largura letras: completa com espacos ou corta e termina com "...". */
+/* O printf com %-45s conta bytes, e letra acentuada ocupa 2 bytes; por isso contamos letras. */
 void imprimir_alinhado(const char *texto, int largura)
 {
     int tamanho = (int)strlen(texto);
@@ -80,6 +87,8 @@ void imprimir_alinhado(const char *texto, int largura)
     int bytes_corte = tamanho;
     int i;
 
+    /* Conta so os bytes que comecam uma letra (os de continuacao sao 10xxxxxx). */
+    /* Guarda tambem onde comeca a letra que ja nao cabe antes do "...". */
     for (i = 0; i < tamanho; i++) {
         if (((unsigned char)texto[i] & UTF8_MASCARA_CONTINUACAO) != UTF8_BYTE_CONTINUACAO) {
             letras++;
@@ -89,6 +98,8 @@ void imprimir_alinhado(const char *texto, int largura)
         }
     }
 
+    /* Texto maior que a coluna: mostra o comeco e "...", para nao empurrar as outras colunas. */
+    /* O corte e sempre no inicio de uma letra, entao nunca parte um acento ao meio. */
     if (letras > largura) {
         printf("%.*s%s", bytes_corte, texto, RETICENCIAS);
     } else {
@@ -97,4 +108,22 @@ void imprimir_alinhado(const char *texto, int largura)
             putchar(' ');
         }
     }
+}
+
+/* Um so lugar para o erro de falta de memoria, em vez de repetir em cada modulo. */
+/* Recebe o que o programa tentava fazer quando a memoria acabou. */
+void encerrar_sem_memoria(const char *motivo)
+{
+    fprintf(stderr, "ERRO FATAL: Memoria insuficiente para %s.\n", motivo);
+    exit(EXIT_FAILURE);
+}
+
+/* Titulo comum do P1 e do P2, para o mesmo texto nao ficar repetido nos dois. */
+/* Recebe a linha que diz qual programa esta rodando. */
+void exibir_titulo(const char *linha_programa)
+{
+    printf("=====================================================\n");
+    printf("   PUCPR - Programacao Imperativa - Trabalho RA2     \n");
+    printf("%s\n", linha_programa);
+    printf("=====================================================\n\n");
 }

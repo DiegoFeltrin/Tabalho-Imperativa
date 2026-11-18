@@ -1,4 +1,5 @@
 /* lista.h: lista ligada de categorias, cada uma com seus alimentos e duas arvores. */
+/* Estrutura em dois niveis: uma lista de categorias, e cada categoria tem a sua lista de alimentos. */
 
 #ifndef LISTA_H
 #define LISTA_H
@@ -8,21 +9,22 @@
 
 /* No da lista de alimentos de uma categoria. */
 typedef struct NoAlimento {
-    Alimento_t dado;
-    struct NoAlimento *proximo;
+    Alimento_t dado;               /* copia do alimento lido do dados.bin */
+    struct NoAlimento *proximo;    /* proximo alimento em ordem alfabetica (NULL no ultimo) */
 } NoAlimento_t;
 
 /* No da lista de categorias: alimentos em ordem alfabetica e as arvores de indice. */
 typedef struct NoCategoria {
-    Categoria_e categoria;
-    NoAlimento_t *alimentos;
-    NoArvore_t *arvore_energia;
-    NoArvore_t *arvore_proteina;
-    int total_alimentos;
-    struct NoCategoria *proximo;
+    Categoria_e categoria;         /* qual categoria e este no (o nome sai de categoria_para_texto) */
+    NoAlimento_t *alimentos;       /* primeiro alimento da categoria, ja em ordem alfabetica */
+    NoArvore_t *arvore_energia;    /* indice dos alimentos por energia */
+    NoArvore_t *arvore_proteina;   /* indice dos alimentos por proteina */
+    int total_alimentos;           /* quantos alimentos a categoria tem agora */
+    struct NoCategoria *proximo;   /* proxima categoria em ordem alfabetica (NULL na ultima) */
 } NoCategoria_t;
 
 /* Le dados.bin, monta as listas e as arvores e devolve a primeira categoria. */
+/* Coloca em *total_lidos quantos alimentos foram carregados. */
 NoCategoria_t *lista_carregar_de_binario(const char *caminho_bin,
                                          int *total_lidos);
 
@@ -40,6 +42,7 @@ void lista_exibir_alimentos_categoria(const NoCategoria_t *no_categoria);
 int lista_remover_alimento(NoCategoria_t *no_categoria, int numero_alimento);
 
 /* Remove a categoria e libera tudo o que ela tem; devolve 1 se removeu. */
+/* Recebe ponteiro para a cabeca porque a primeira categoria pode ser a removida. */
 int lista_remover_categoria(NoCategoria_t **cabeca_categorias,
                             Categoria_e categoria);
 
@@ -48,6 +51,7 @@ int lista_salvar_binario(const NoCategoria_t *cabeca,
                          const char *caminho_bin);
 
 /* Libera todas as categorias, alimentos e arvores e zera a cabeca. */
+/* Depois dela a lista fica vazia (cabeca = NULL). */
 void lista_liberar_tudo(NoCategoria_t **cabeca);
 
 #endif /* LISTA_H */
